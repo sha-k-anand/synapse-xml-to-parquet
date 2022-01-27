@@ -1,0 +1,20 @@
+SELECT
+    catalog,
+	c1.[key],
+	c1.[value],
+
+	JSON_VALUE(catalog,'$."product"."@description"') as product_description1,
+	JSON_VALUE(catalog,'$."product"."@product_image"') as product_description1,
+	
+    JSON_VALUE(c1.value,'$."@gender"') as gender,
+	JSON_VALUE(c1.value,'$."item_number"') as item_number,
+	JSON_VALUE(c1.value,'$."price"') as price,
+	JSON_QUERY(c1.value,'$."size"') as size
+
+
+FROM
+    OPENROWSET(
+        BULK 'https://jsondataadls.dfs.core.windows.net/fs1/xmllib/outputdf/part-00000-46ec19dc-1bb0-475c-a24a-3d58d6210f9f-c000.snappy.parquet',
+        FORMAT = 'PARQUET'
+    ) AS [result]
+CROSS APPLY OPENJSON(catalog,'$.product.catalog_item') c1

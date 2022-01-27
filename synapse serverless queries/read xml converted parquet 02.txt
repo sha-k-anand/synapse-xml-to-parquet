@@ -1,0 +1,26 @@
+SELECT
+    catalog,
+	c1.[key],
+	c1.[value],
+
+	JSON_VALUE(catalog,'$."product"."@description"') as product_description1,
+	JSON_VALUE(catalog,'$."product"."@product_image"') as product_description1,
+	
+    c2.[key],
+	c2.[value],
+	JSON_VALUE(c2.[value],'$."@description"') as size_description,
+
+    c3.[key],
+	c3.[value],
+	JSON_VALUE(c3.[value],'$."@image"') as image,
+	JSON_VALUE(c3.[value],'$."_value_"') as image_value
+
+
+FROM
+    OPENROWSET(
+        BULK 'https://jsondataadls.dfs.core.windows.net/fs1/xmllib/outputdf/part-00000-46ec19dc-1bb0-475c-a24a-3d58d6210f9f-c000.snappy.parquet',
+        FORMAT = 'PARQUET'
+    ) AS [result]
+CROSS APPLY OPENJSON(catalog,'$.product.catalog_item') c1
+CROSS APPLY OPENJSON(c1.value,'$."size"') c2
+CROSS APPLY OPENJSON(c2.value,'$."color_swatch"') c3
